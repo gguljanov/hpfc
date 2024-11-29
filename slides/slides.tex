@@ -15,6 +15,7 @@
 \usepackage[rightcaption]{sidecap}
 \usepackage{mathtools}
 \usepackage{amsmath}
+\usepackage{dsfont}
 
 \usepackage{xcolor}
 
@@ -38,10 +39,7 @@
 \hfuzz = 60pt
 \hfuzz = -60pt
 
-\title{
-    \fontsize{12pt}{15pt} \selectfont
-    HOURLY PRICE FORWARD CURVE
-}
+\title{\fontsize{12pt}{15pt} \selectfont HOURLY PRICE FORWARD CURVE}
 
 \author{Dr. Gaygysyz Guljanov}
 
@@ -57,9 +55,115 @@
 
 
 \section{Introduction}
+\begin{frame}
+    \begin{itemize}
+        \item The valuation using the hourly forward curve must match the valuation using market quotes from exchanges.
+        \item
+              \[
+                  \frac{1}{|J^b| \sum_{i \in J^b} F(t, T_i)} = F^b
+              \]
+              \begin{itemize}
+                  \item $F_b$ is the price of a standard baseload contract (e.g. a certain calendar year)
+                  \item $J^b$ is the set of hours within the delivery year
+                  \item $F(t, T_i)$ is a forward curve at current time $t$ for all delivery hours (or days) $T_i (i = 1, \ldots, N)$
+              \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \begin{itemize}
+        \item[Step 1:] Model the weekly and yearly shape of average daily prices, that is calculate daily shape factors from historical spot prices
+
+        \item[Step 2:] Model the (hourly) intra-day shape for different profile types depending on weekday and season (not required for daily forward curves)
+
+        \item[Step 3:] Apply the yearly and intra-day shape factors to quoted forward prices
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \begin{itemize}
+        \item $y_t$: normalized daily spot prices, i.e. baseload spot price at day $t$ divided by the average spot price of that year
+
+        \item $y_k(t)$: normalized spot price for the $k$th hour of the day $t (k = 1, \ldots, 24)$
+
+        \item $h_k(t) = y_k(t) / y(t)$: normalized hourly spot shape
+
+        \item Dummy variables to model seasonalities
+              \[
+                  y(t)
+                  = \sum_{j = 1}^N \beta_j \mathds{1}_{D_j}(t) + \epsilon(t)
+              \]
+              \begin{itemize}
+                  \item $D_j$: set of all days within cluster $j$
+              \end{itemize}
+
+        \item Treat outliers carefully
+
+        \item Approach can be refined by using a more complex regression model (e.g. temperature as an explanatory variable)
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \begin{itemize}
+        \item Hourly Forward Curve for the $k$th hour of day $t$ (denoted by $T$) can be defined as:
+              \[
+                  F(t_0, T) = \hat y(t) \hat h_k(t) F
+              \]
+              \begin{itemize}
+                  \item $F$: a yearly baseload forward price
+              \end{itemize}
+
+        \item Above, the shape factors are applied in such a way that the resulting hourly forward curve is consistent with quoted forward prices.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    Non-overlapping contracts:
+    \begin{itemize}
+        \item If there are several non-overlapping market forward prices, the shape factors can be normalized to mean $1$ during each contract period and the same method can be used.
+
+              \begin{itemize}
+                  \item The shape factors $\hat h_k(t)$ can be normalized to mean $1$ separately for peak and off-peak hours and applied to the corresponding peak and off-peak forward price.
+
+                  \item As the peak and off-peak hours are scaled by different shape factors in this case, a discontinuity may arise at the intersection betweek peak and off-peak. This might require an additional smoothing procedure.
+              \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    Overlapping contracts: ...
+\end{frame}
+
+
+\begin{frame}
+    Possible clusters
+    \begin{itemize}
+        \item Choose number of clusters carefully, to have sufficient historical data
+
+        \item (i) Monday, (ii) Tu-Th, (iii) Fr, (iv) Sa, (v) Su
+
+        \item The above point could contain holidays and bridge days
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    Refinements:
+    \begin{itemize}
+        \item Off-standard contracts
+        \item Bid-offer prices and smoothing
+        \item Structural trends
+    \end{itemize}
+\end{frame}
 
 
 % Put the bibliography
-\bibliography{../Paper/Pruned_Skewed_Kalman_ref}
+\nocite{*}
+\bibliography{biblio.bib}
 
 \end{document}

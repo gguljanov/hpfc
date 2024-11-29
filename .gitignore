@@ -5,6 +5,8 @@ task.pdf
 slides.pdf
 
 # Core latex/pdflatex auxiliary files:
+*.bbl
+*.blg
 *.fdb_latexmk
 *.nav
 *.snm
