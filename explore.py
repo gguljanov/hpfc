@@ -69,7 +69,7 @@ fig_outliers = (
     + labs(x="Time", y="Prices")
 )
 fig_outliers.draw(show=True)
-fig_outliers.save(filename="hi.pdf")
+fig_outliers.save("hi.pdf")
 
 
 # === Remove Outliers ===
@@ -78,10 +78,20 @@ up_spike = outlier_df["Preis"] > outlier_df["Preis_upper"]
 
 wo_outlier_df = outlier_df.copy()
 
-wo_outlier_df.loc[down_spike, "Preis"] = np.nan
-wo_outlier_df.loc[up_spike, "Preis"] = np.nan
+sel = down_spike + up_spike
 
-wo_outlier_df.interpolate(method="linear", inplace=True)
+# wo_outlier_df.loc[down_spike, "Preis"] = np.nan
+# wo_outlier_df.loc[up_spike, "Preis"] = np.nan
+
+smoothed_preis = (
+    wo_outlier_df.loc[:, "Preis"]
+    .rolling(window=168, min_periods=1, center=True)
+    .mean()
+)
+
+wo_outlier_df.loc[sel, "Preis"] = smoothed_preis[sel]
+
+# wo_outlier_df.interpolate(method="time", inplace=True)
 
 fig_wo_outliers = (
     ggplot(wo_outlier_df, mapping=aes("Datum", "Preis"))
@@ -90,6 +100,7 @@ fig_wo_outliers = (
     + labs(x="Time", y="Prices")
 )
 fig_wo_outliers.draw(show=True)
+fig_wo_outliers.save("hi2.pdf")
 
 his_data = wo_outlier_df[["Datum", "Preis"]]
 his_data.head()

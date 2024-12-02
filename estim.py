@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 import matplotlib.pyplot as plt
 from plotnine.ggplot import ggplot
@@ -20,11 +21,15 @@ from plotnine import (
 
 
 # === Load data ===
-h_df = pd.read_csv("h_df.csv")
+h_df = pd.read_csv("h_df.csv", index_col=0, parse_dates=True)
 h_df.head()
+
+h_df["Datum"] = pd.to_datetime(h_df["Datum"])
 
 d_df = pd.read_csv("d_df.csv", date_format="yyyy-mm-dd", index_col=0)
 d_df.head()
+
+d_df["date"] = pd.to_datetime(d_df["date"])
 
 
 # === Seasonality dummies for a year ===
@@ -108,13 +113,43 @@ Y_vec_day = h_df_dummies.loc[:, "nh_preis"]
 reg_day_shape = LinearRegression().fit(X=X_mat_day, y=Y_vec_day)
 reg_day_shape.score(X=X_mat_day, y=Y_vec_day)
 
-# First tests
-# Download from eex
-# Check on the eex data
+nd_pred = reg_year_shape.predict(X_mat)
+d_df["nd_pred"] = nd_pred
+
+nh_pred = reg_day_shape.predict(X_mat_day)
+h_df["nh_pred"] = nh_pred
+
+h_df = h_df.merge(
+    right=d_df[["year", "month", "day", "nd_pred"]], on=["year", "month", "day"]
+)
+
+rprint(h_df.head())
+
+h_df["h_pred"] = h_df["nh_pred"] * h_df["nd_pred"]
+rprint(h_df.head())
+
+fig_h_pred = (
+    ggplot(h_df[h_df["month"] == 1], mapping=aes(x="Datum", y="h_preis"))
+    + geom_line()
+    + geom_line(mapping=aes(y="h_pred"), color="yellow")
+    + facet_wrap("year", scales="free")
+    + ggtitle("Actual and Predicted Hourly Prices")
+    + labs(x="Time", y="Prices")
+)
+
+fig_h_pred.draw(show=True)
+
 
 # === Autocorrelation before and after de-seasonalization
 
+
 # === MAE, RMSE ===
+rprint(mean_absolute_error(y_true=h_df["h_preis"], y_pred=h_df["h_pred"]))
+rprint(mean_squared_error(y_true=h_df["h_preis"], y_pred=h_df["h_pred"]))
 
 
 # === Backtesting ===
+
+
+# Download from eex
+# Check on the eex data
