@@ -1,8 +1,12 @@
 # Unnecessary file
 2024 Historische day-ahead-Preise Strom DE.xlsx
 202411 RMM Methods a. Modelling.pptx
+
 task.pdf
 slides.pdf
+
+h_df.csv
+d_df.csv
 
 # Core latex/pdflatex auxiliary files:
 *.bbl
