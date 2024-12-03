@@ -31,6 +31,8 @@ d_df.head()
 
 d_df["date"] = pd.to_datetime(d_df["date"])
 
+y_df = pd.read_csv("y_df.csv", index_col=0)
+
 
 # === Seasonality dummies & Regression for a year ===
 d_df.insert(loc=4, column="weekday", value=-1000)
@@ -125,13 +127,16 @@ h_df = h_df.merge(
     right=d_df[["year", "month", "day", "nd_pred"]], on=["year", "month", "day"]
 )
 
+h_df = h_df.merge(right=y_df, on=["year"])
+
 rprint(h_df.head())
 
-h_df["h_pred"] = h_df["nh_pred"] * h_df["nd_pred"]
+h_df["h_pred"] = h_df["nh_pred"] * h_df["nd_pred"] * h_df["y_preis"]
 rprint(h_df.head())
 
 fig_h_pred = (
-    ggplot(h_df[h_df["month"] == 1], mapping=aes(x="Datum", y="h_preis"))
+    # ggplot(h_df[h_df["month"] == 1], mapping=aes(x="Datum", y="h_preis"))
+    ggplot(h_df, mapping=aes(x="Datum", y="h_preis"))
     + geom_line()
     + geom_line(mapping=aes(y="h_pred"), color="yellow")
     + facet_wrap("year", scales="free")
@@ -139,7 +144,7 @@ fig_h_pred = (
     + labs(x="Time", y="Prices")
 )
 
-fig_h_pred.draw(show=True)
+# fig_h_pred.draw(show=True)
 fig_h_pred.save(filename="fig_h_pred.pdf", path="Figs")
 
 
@@ -148,8 +153,18 @@ fig_h_pred.save(filename="fig_h_pred.pdf", path="Figs")
 
 
 # === MAE, RMSE ===
-rprint(mean_absolute_error(y_true=h_df["h_preis"], y_pred=h_df["h_pred"]))
-rprint(mean_squared_error(y_true=h_df["h_preis"], y_pred=h_df["h_pred"]))
+fit_df = pd.DataFrame(
+    index=["in-sample", "out-of-sample"], columns=["MAE", "RMSE"]
+)
+
+fit_df.loc["in-sample", "MAE"] = mean_absolute_error(
+    y_true=h_df["h_preis"], y_pred=h_df["h_pred"]
+)
+fit_df.loc["in-sample", "RMSE"] = mean_squared_error(
+    y_true=h_df["h_preis"], y_pred=h_df["h_pred"]
+)
+
+rprint(fit_df)
 
 
 # === Backtesting ===
@@ -186,7 +201,9 @@ h_df_test = h_df_test.merge(
 
 rprint(h_df_test.columns)
 
-h_df_test["h_pred_out"] = h_df_test["nh_pred_out"] * h_df_test["nd_pred_out"]
+h_df_test["h_pred_out"] = (
+    h_df_test["nh_pred_out"] * h_df_test["nd_pred_out"] * h_df_test["y_preis"]
+)
 rprint(h_df.columns)
 
 fig_h_pred_out = (
@@ -201,14 +218,20 @@ fig_h_pred_out = (
     + labs(x="Time", y="Prices")
 )
 
-fig_h_pred_out.draw(show=True)
+# fig_h_pred_out.draw(show=True)
 fig_h_pred_out.save(filename="fig_h_pred_out.pdf", path="Figs")
 
-rprint(
-    mean_absolute_error(y_true=Y_vec_hour_test, y_pred=h_df_test["h_pred_out"])
+# Out-of-sample fit
+fit_df.loc["out-of-sample", "MAE"] = mean_absolute_error(
+    y_true=Y_vec_hour_test, y_pred=h_df_test["h_pred_out"]
 )
-rprint(mean_squared_error(y_true=Y_vec_hour_test, y_pred=hour_pred))
+fit_df.loc["out-of-sample", "RMSE"] = mean_squared_error(
+    y_true=Y_vec_hour_test, y_pred=h_df_test["h_pred_out"]
+)
 
+rprint(fit_df)
+
+fit_df.to_latex(buf="Tables/fit_df.tex")
 
 # === EEX ===
 # To be done

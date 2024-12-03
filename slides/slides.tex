@@ -125,12 +125,24 @@
 
 \begin{frame}{Game Plan Details -- \cite{BurgerGraeberSchindlmayr-2014}}
     \begin{enumerate}[label=$\bullet$, itemsep=0.1cm]
-        \item $y_t$: normalized daily spot prices, i.e. baseload spot price at day $t$ divided by the average spot price of that year
+        \item Normalized daily spot prices, i.e. baseload spot price at day $t$ divided by the average spot price of that year:
+              \[ y(t) \]
 
-        \item $y_k(t)$: normalized spot price for the $k$th hour of the day $t (k = 1, \ldots, 24)$
+        \item Normalized spot price for the $k$th hour of the day $t$:
+              \[ y_k(t), \quad k = 1, \ldots, 24 \]
 
-        \item $h_k(t) = y_k(t) / y(t)$: normalized hourly spot shape
+        \item Normalized hourly spot shape:
+              \[
+                  h_k(t)
+                  = \frac{y_k(t)}{y(t)}
+                  = \frac{\text{Hourly Price}}{\text{Daily Price}}
+              \]
+    \end{enumerate}
+\end{frame}
 
+
+\begin{frame}{Game Plan Details -- \cite{BurgerGraeberSchindlmayr-2014}}
+    \begin{enumerate}[label=$\bullet$, itemsep=0.1cm]
         \item Dummy variables to model seasonalities
               \[
                   y(t)
@@ -282,24 +294,79 @@
 \section{Refinements and Improvements}
 
 \begin{frame}{Possible Improvements}
-    Improvements in two ways:
     \begin{enumerate}[label=(\roman*)]
-        \item Modeling the error term: e.g. Extra Regressors
-              \begin{enumerate}
-                  \item CDD and HDD
-                  \item Temperature of the Day
-                  \item Use Bid/Offer Spread
-                  \item Polynomial Regression
-              \end{enumerate}
+        \item Modeling the error term:
+              Extra Regressors: Temperature of the day, CDD and HDD,
 
         \item Other models and functional forms
-              \begin{enumerate}
-                  \item Smoothing with penalty parameter $\lambda$
-                  \item Fourier or trigonometric functions
-              \end{enumerate}
-    \end{enumerate}
 
-    Will be improved until presentation
+        \item The combination of the two
+    \end{enumerate}
+\end{frame}
+
+
+\begin{frame}{Possible Improvements}
+    Extra Regressors
+    \begin{enumerate}[label=(\roman*)]
+        \item Temperature of the day
+
+        \item CDD and HDD,
+
+        \item
+    \end{enumerate}
+\end{frame}
+
+
+\begin{frame}{Modelling the Error Term}
+    Polynomial Regression
+\end{frame}
+
+
+\begin{frame}{Modelling the Error Term}
+    Using Structural trends: from \cite{deJongDijkenEnev-2013} and \cite{BurgerGraeberSchindlmayr-2014}
+    \[
+        \Delta s(t) = -\beta_1 s(t-24)
+        - \beta_2 \Delta p_{\text{solar}}(t)
+        - \beta_3 \Delta p_{\text{wind}}(t)
+        + \epsilon(t)
+    \]
+    \begin{enumerate}[label=$\bullet$]
+        \item $s(t)$: spot price for hour $t$
+        \item $\Delta$: lag operator with period $24$
+        \item $p_{\text{solar}}(t)$: wind production
+        \item $p_{\text{wind}}(t)$: solar production
+    \end{enumerate}
+\end{frame}
+
+
+
+\begin{frame}{Other models and functional forms}
+    Bid-offer prices \& Smoothing from \cite{FletenLemming-2003} and \cite{BurgerGraeberSchindlmayr-2014}:
+    \[
+        \min \sum_{t=1}^T \bigg(f(t) - s(t) \bigg)^2
+        + \lambda \sum_{t=2}^{T-1} \bigg(
+        f(t-1) - 2 f(t) + f(t+1)
+        \bigg)^2
+    \]
+    subject to
+    \begin{align*}
+        F(T_{1i}, T_{2i})_{bid}
+         & \leq
+        \frac{1}{\sum_{t=T_{1i}}^{T_{2i}}} e^{-rt}
+        \sum_{t=T_{1i}}^{T_{2i}} e^{-rt} f(t);
+        \quad \forall i \in \mathcal{F}
+        \\
+        F(T_{1i}, T_{2i})_{offer}
+         & \geq
+        \frac{1}{\sum_{t=T_{1i}}^{T_{2i}}} e^{-rt}
+        \sum_{t=T_{1i}}^{T_{2i}} e^{-rt} f(t);
+        \quad \forall i \in \mathcal{F}
+    \end{align*}
+\end{frame}
+
+
+\begin{frame}{Other models and functional forms}
+    Fourier or trigonometric functions
 \end{frame}
 
 

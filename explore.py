@@ -37,7 +37,7 @@ fig_rawdata = (
     + ggtitle("Raw Hourly Prices after Filling Missing Values")
     + labs(x="Time", y="Prices")
 )
-fig_rawdata.draw(show=True)
+# fig_rawdata.draw(show=True)
 fig_rawdata.save(filename="fig_rawdata.pdf", path="Figs")
 
 # Outliers
@@ -69,7 +69,7 @@ fig_outliers = (
     + ggtitle("Hourly Prices: Detecting Outliers")
     + labs(x="Time", y="Prices")
 )
-fig_outliers.draw(show=True)
+# fig_outliers.draw(show=True)
 fig_outliers.save(filename="fig_outliers.pdf", path="Figs")
 
 
@@ -100,7 +100,7 @@ fig_wo_outliers = (
     + ggtitle("Hourly Prices: After Removing Outliers")
     + labs(x="Time", y="Prices")
 )
-fig_wo_outliers.draw(show=True)
+# fig_wo_outliers.draw(show=True)
 fig_wo_outliers.save(filename="fig_wo_outliers.pdf", path="Figs")
 
 his_data = wo_outlier_df[["Datum", "Preis"]]
@@ -155,11 +155,11 @@ d_df.head()
 
 
 h_df = h_df.merge(
-    right=d_df[["year", "month", "day", "nd_preis"]],
+    right=d_df[["year", "month", "day", "d_preis"]],
     on=["year", "month", "day"],
 )
 
-h_df["nh_preis"] = h_df["h_preis"] / h_df["nd_preis"]
+h_df["nh_preis"] = h_df["h_preis"] / h_df["d_preis"]
 
 h_df.head()
 
@@ -167,6 +167,7 @@ h_df.head()
 # === Save the data sets ===
 h_df.to_csv("h_df.csv")
 d_df.to_csv("d_df.csv")
+y_df.to_csv("y_df.csv")
 
 
 # === Plot Hourly Prices ===
@@ -180,7 +181,7 @@ fig_h_preis = (
     + labs(x="Time", y="Prices")
 )
 
-fig_h_preis.draw(show=True)
+# fig_h_preis.draw(show=True)
 
 
 # Normalized hourly prices
@@ -192,7 +193,7 @@ fig_nh_preis = (
     + labs(x="Time", y="Prices")
 )
 
-fig_nh_preis.draw(show=True)
+# fig_nh_preis.draw(show=True)
 fig_nh_preis.save(filename="fig_nh_preis.pdf", path="Figs")
 
 
@@ -205,7 +206,7 @@ fig_d_preis = (
     + labs(x="Time", y="Prices")
 )
 
-fig_d_preis.draw(show=True)
+# fig_d_preis.draw(show=True)
 
 
 # Normalized daily prices
@@ -217,7 +218,7 @@ fig_nd_preis = (
     + labs(x="Time", y="Prices")
 )
 
-fig_nd_preis.draw(show=True)
+# fig_nd_preis.draw(show=True)
 fig_nd_preis.save(filename="fig_nd_preis.pdf", path="Figs")
 
 
@@ -228,7 +229,7 @@ fig_y_preis = (
     + ggtitle("Yearly Prices")
     + labs(x="Year", y="Price")
 )
-fig_y_preis.draw(show=True)
+# fig_y_preis.draw(show=True)
 
 
 # === Box Plots -- Monthly ===
@@ -239,7 +240,7 @@ fig_box_month = (
     + labs(x="Time", y="Prices")
 )
 
-fig_box_month.draw(show=True)
+# fig_box_month.draw(show=True)
 fig_box_month.save(filename="fig_box_month.pdf", path="Figs")
 
 
@@ -256,7 +257,7 @@ fig_box_day = (
     + labs(x="Time", y="Prices")
 )
 
-fig_box_day.draw(show=True)
+# fig_box_day.draw(show=True)
 fig_box_day.save(filename="fig_box_day.pdf", path="Figs")
 
 
