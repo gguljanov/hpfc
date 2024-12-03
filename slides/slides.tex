@@ -54,10 +54,31 @@
 \frame{\titlepage}
 
 
-\section{Introduction}
+% === Data Pre-processing ===
+\section{Data Pre-processing}
+
+\begin{frame}{Missing values}
+    Following \cite{SvantessonRastegar-2019}, I use linear interpolation to fill in the missing values.
+\end{frame}
+
+
+\begin{frame}{Outliers}
+    \begin{itemize}
+        \item Following \cite{SvantessonRastegar-2019}, I use 99 percentile
+
+        \item 168 day moving average, to fill in
+    \end{itemize}
+\end{frame}
+
+
+
+% === Theoretical Background ===
+\section{Theoretical Background}
+
 \begin{frame}
     \begin{itemize}
         \item The valuation using the hourly forward curve must match the valuation using market quotes from exchanges.
+
         \item
               \[
                   \frac{1}{|J^b| \sum_{i \in J^b} F(t, T_i)} = F^b
@@ -139,6 +160,10 @@
     Overlapping contracts: ...
 \end{frame}
 
+
+
+% === Seasonality clusters ===
+\section{Seasonality clusters}
 
 \begin{frame}
     Possible clusters
