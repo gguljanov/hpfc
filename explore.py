@@ -34,10 +34,11 @@ fig_rawdata = (
     ggplot(his_data, mapping=aes("Datum", "Preis"))
     + geom_line()
     # + geom_hline(yintercept=0)
-    + ggtitle("Hourly prices")
+    + ggtitle("Raw Hourly Prices after Filling Missing Values")
     + labs(x="Time", y="Prices")
 )
 fig_rawdata.draw(show=True)
+fig_rawdata.save(filename="fig_rawdata.pdf", path="Figs")
 
 # Outliers
 outlier_df = his_data.copy()
@@ -69,7 +70,7 @@ fig_outliers = (
     + labs(x="Time", y="Prices")
 )
 fig_outliers.draw(show=True)
-fig_outliers.save("hi.pdf")
+fig_outliers.save(filename="fig_outliers.pdf", path="Figs")
 
 
 # === Remove Outliers ===
@@ -100,7 +101,7 @@ fig_wo_outliers = (
     + labs(x="Time", y="Prices")
 )
 fig_wo_outliers.draw(show=True)
-fig_wo_outliers.save("hi2.pdf")
+fig_wo_outliers.save(filename="fig_wo_outliers.pdf", path="Figs")
 
 his_data = wo_outlier_df[["Datum", "Preis"]]
 his_data.head()
@@ -192,6 +193,7 @@ fig_nh_preis = (
 )
 
 fig_nh_preis.draw(show=True)
+fig_nh_preis.save(filename="fig_nh_preis.pdf", path="Figs")
 
 
 # === Plot Daily Prices ===
@@ -216,6 +218,7 @@ fig_nd_preis = (
 )
 
 fig_nd_preis.draw(show=True)
+fig_nd_preis.save(filename="fig_nd_preis.pdf", path="Figs")
 
 
 # === Plot Yearly Prices ===
@@ -229,16 +232,32 @@ fig_y_preis.draw(show=True)
 
 
 # === Box Plots -- Monthly ===
-fig = (
+fig_box_month = (
     ggplot(d_df, mapping=aes(x="factor(month)", y="nd_preis"))
     + geom_boxplot()
     + ggtitle("Daily prices")
     + labs(x="Time", y="Prices")
 )
-fig.draw(show=True)
+
+fig_box_month.draw(show=True)
+fig_box_month.save(filename="fig_box_month.pdf", path="Figs")
 
 
 # === Box Plots -- Daily ===
+d_df.insert(loc=5, column="weekday", value=-1000)
+
+for ii in range(d_df.shape[0]):
+    d_df.loc[ii, "weekday"] = d_df.loc[ii, "date"].weekday()
+
+fig_box_day = (
+    ggplot(d_df, mapping=aes(x="factor(weekday)", y="nd_preis"))
+    + geom_boxplot()
+    + ggtitle("Daily prices")
+    + labs(x="Time", y="Prices")
+)
+
+fig_box_day.draw(show=True)
+fig_box_day.save(filename="fig_box_day.pdf", path="Figs")
 
 
 # === Autocorrelation Plots ===

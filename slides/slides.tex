@@ -39,6 +39,10 @@
 \hfuzz = 60pt
 \hfuzz = -60pt
 
+\usepackage{enumitem}
+\setlist[enumerate]{font=\bfseries, label=(\alph*), itemsep=0.5cm}
+
+
 \title{\fontsize{12pt}{15pt} \selectfont HOURLY PRICE FORWARD CURVE}
 
 \author{Dr. Gaygysyz Guljanov}
@@ -46,28 +50,46 @@
 \institute{University of Münster}
 
 \date{04.11.2024}
+% -----------------------------------------------------------------
 
 
-
+% === Document begins ===
 \begin{document}
 
 \frame{\titlepage}
+
+% === Outline ===
+\section{Outline}
+
+\begin{frame}{Outline}
+    \tableofcontents
+\end{frame}
 
 
 % === Data Pre-processing ===
 \section{Data Pre-processing}
 
-\begin{frame}{Missing values}
-    Following \cite{SvantessonRastegar-2019}, I use linear interpolation to fill in the missing values.
+\begin{frame}{Missing values \& Outliers}
+    \begin{enumerate}
+        \item \textbf{Missing Values:} Following \cite{SvantessonRastegar-2019}, I use linear interpolation to fill in the missing values.
+
+        \item \textbf{Outliers:} Following \cite{SvantessonRastegar-2019}, I use 99 percentile and 168 day moving average
+    \end{enumerate}
 \end{frame}
 
 
-\begin{frame}{Outliers}
-    \begin{itemize}
-        \item Following \cite{SvantessonRastegar-2019}, I use 99 percentile
+\begin{frame}{Raw Data}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_rawdata.pdf}
+\end{frame}
 
-        \item 168 day moving average, to fill in
-    \end{itemize}
+
+\begin{frame}{Raw Data with Outliers}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_outliers.pdf}
+\end{frame}
+
+
+\begin{frame}{Raw Data without Outliers}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_wo_outliers.pdf}
 \end{frame}
 
 
@@ -75,36 +97,34 @@
 % === Theoretical Background ===
 \section{Theoretical Background}
 
-\begin{frame}
-    \begin{itemize}
-        \item The valuation using the hourly forward curve must match the valuation using market quotes from exchanges.
+\begin{frame}{Theoretical Background -- \cite{BurgerGraeberSchindlmayr-2014}}
+    The valuation using the hourly forward curve must match the valuation using market quotes from exchanges:
+    \[
+        \frac{1}{|J^b| \sum_{i \in J^b} F(t, T_i)} = F^b
+    \]
+    \begin{enumerate}[label=--, itemsep=0.1cm]
+        \item $F_b$ is the price of a standard baseload contract (e.g. a certain calendar year)
 
-        \item
-              \[
-                  \frac{1}{|J^b| \sum_{i \in J^b} F(t, T_i)} = F^b
-              \]
-              \begin{itemize}
-                  \item $F_b$ is the price of a standard baseload contract (e.g. a certain calendar year)
-                  \item $J^b$ is the set of hours within the delivery year
-                  \item $F(t, T_i)$ is a forward curve at current time $t$ for all delivery hours (or days) $T_i (i = 1, \ldots, N)$
-              \end{itemize}
-    \end{itemize}
+        \item $J^b$ is the set of hours within the delivery year
+
+        \item $F(t, T_i)$ is a forward curve at current time $t$ for all delivery hours (or days) $T_i (i = 1, \ldots, N)$
+    \end{enumerate}
 \end{frame}
 
 
-\begin{frame}
-    \begin{itemize}
+\begin{frame}{Game Plan -- \cite{BurgerGraeberSchindlmayr-2014}}
+    \begin{enumerate}
         \item[Step 1:] Model the weekly and yearly shape of average daily prices, that is calculate daily shape factors from historical spot prices
 
         \item[Step 2:] Model the (hourly) intra-day shape for different profile types depending on weekday and season (not required for daily forward curves)
 
         \item[Step 3:] Apply the yearly and intra-day shape factors to quoted forward prices
-    \end{itemize}
+    \end{enumerate}
 \end{frame}
 
 
-\begin{frame}
-    \begin{itemize}
+\begin{frame}{Game Plan Details -- \cite{BurgerGraeberSchindlmayr-2014}}
+    \begin{enumerate}[label=$\bullet$, itemsep=0.1cm]
         \item $y_t$: normalized daily spot prices, i.e. baseload spot price at day $t$ divided by the average spot price of that year
 
         \item $y_k(t)$: normalized spot price for the $k$th hour of the day $t (k = 1, \ldots, 24)$
@@ -116,76 +136,181 @@
                   y(t)
                   = \sum_{j = 1}^N \beta_j \mathds{1}_{D_j}(t) + \epsilon(t)
               \]
-              \begin{itemize}
+              \begin{enumerate}
                   \item $D_j$: set of all days within cluster $j$
-              \end{itemize}
-
-        \item Treat outliers carefully
+              \end{enumerate}
 
         \item Approach can be refined by using a more complex regression model (e.g. temperature as an explanatory variable)
-    \end{itemize}
+    \end{enumerate}
 \end{frame}
 
 
-\begin{frame}
-    \begin{itemize}
+\begin{frame}{Game Plan Details -- \cite{BurgerGraeberSchindlmayr-2014}}
+    \begin{enumerate}[label=--]
         \item Hourly Forward Curve for the $k$th hour of day $t$ (denoted by $T$) can be defined as:
               \[
                   F(t_0, T) = \hat y(t) \hat h_k(t) F
               \]
-              \begin{itemize}
+              \begin{enumerate}[label=$\bullet$]
                   \item $F$: a yearly baseload forward price
-              \end{itemize}
+              \end{enumerate}
 
         \item Above, the shape factors are applied in such a way that the resulting hourly forward curve is consistent with quoted forward prices.
-    \end{itemize}
+    \end{enumerate}
 \end{frame}
 
 
-\begin{frame}
-    Non-overlapping contracts:
-    \begin{itemize}
-        \item If there are several non-overlapping market forward prices, the shape factors can be normalized to mean $1$ during each contract period and the same method can be used.
-
-              \begin{itemize}
-                  \item The shape factors $\hat h_k(t)$ can be normalized to mean $1$ separately for peak and off-peak hours and applied to the corresponding peak and off-peak forward price.
-
-                  \item As the peak and off-peak hours are scaled by different shape factors in this case, a discontinuity may arise at the intersection betweek peak and off-peak. This might require an additional smoothing procedure.
-              \end{itemize}
-    \end{itemize}
+\begin{frame}{Normalized Hourly Prices}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_nh_preis.pdf}
 \end{frame}
 
 
-\begin{frame}
-    Overlapping contracts: ...
+\begin{frame}{Normalized Daily Prices}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_nd_preis.pdf}
 \end{frame}
+
+
+% \begin{frame}{Non-overlapping contracts -- \cite{BurgerGraeberSchindlmayr-2014}}
+%     Non-overlapping contracts:
+%     \begin{enumerate}
+%         \item If there are several non-overlapping market forward prices, the shape factors can be normalized to mean $1$ during each contract period and the same method can be used.
+
+%               \begin{enumerate}
+%                   \item The shape factors $\hat h_k(t)$ can be normalized to mean $1$ separately for peak and off-peak hours and applied to the corresponding peak and off-peak forward price.
+
+%                   \item As the peak and off-peak hours are scaled by different shape factors in this case, a discontinuity may arise at the intersection betweek peak and off-peak. This might require an additional smoothing procedure.
+%               \end{enumerate}
+%     \end{enumerate}
+% \end{frame}
 
 
 
 % === Seasonality clusters ===
 \section{Seasonality clusters}
 
-\begin{frame}
-    Possible clusters
-    \begin{itemize}
-        \item Choose number of clusters carefully, to have sufficient historical data
+\begin{frame}{Seasonalities within a Year}
+    We should choose the number of clusters carefully, to have sufficient historical data.
 
-        \item (i) Monday, (ii) Tu-Th, (iii) Fr, (iv) Sa, (v) Su
+    Following \cite{SteinErikParaschivSchuerle-2013}, we use the following dummy variables to model the seasonalities for daily prices:
+    \begin{enumerate}[label=--]
+        \item $6$ dummy variables (Mo-Sa)
 
-        \item The above point could contain holidays and bridge days
-    \end{itemize}
+        \item $11$ monthly dummy variables (Feb-Dec)
+
+        \item August should be subdivided in two parts, due to summer vacations
+    \end{enumerate}
 \end{frame}
 
 
-\begin{frame}
-    Refinements:
-    \begin{itemize}
-        \item Off-standard contracts
-        \item Bid-offer prices and smoothing
-        \item Structural trends
-    \end{itemize}
+\begin{frame}{Box Plots per Month}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_box_month.pdf}
 \end{frame}
 
+
+\begin{frame}{Box Plots per Weekday}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_box_day.pdf}
+\end{frame}
+
+
+
+\begin{frame}{Seasonalities within a Day}
+    Following \cite{SteinErikParaschivSchuerle-2013}, we use the following dummy variables to model the seasonalities for hourly prices:
+
+    \footnotesize
+    \begin{tabular}{l|cccccccccccc}
+         & J  & F  & M  & A  & M  & J  & J  & A  & S  & O  & N  & D
+        \\
+        \toprule
+        Week day
+         & 1  & 2  & 3  & 4  & 5  & 6  & 7  & 8  & 9  & 10 & 11 & 12
+        \\
+        Sat
+         & 13 & 13 & 14 & 14 & 14 & 15 & 15 & 15 & 16 & 16 & 16 & 13
+        \\
+        Sun
+         & 17 & 17 & 18 & 18 & 18 & 19 & 19 & 19 & 20 & 20 & 20 & 17
+    \end{tabular}
+
+    \vspace*{0.8cm}
+    The above points could contain holidays and bridge days.
+\end{frame}
+
+
+\begin{frame}{Box Plots for Seasonalities within a Day}
+    Figures are coming
+\end{frame}
+
+
+% === Assumptions ===
+\section{Assumptions}
+
+\begin{frame}{Assumptions}
+    \begin{enumerate}[label=\roman*.]
+        \item Linearity
+        \item Symmetry
+        \item Discreteness arising from dummy variables
+        \item ...
+    \end{enumerate}
+\end{frame}
+
+
+% === Estimation Results ===
+\section{Estimation Results}
+
+\begin{frame}{Estimation Results}
+    The Results are coming soon. For now, it can be accessed with running Python Codes.
+\end{frame}
+
+
+\begin{frame}{Actual vs. Predict values}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_h_pred.pdf}
+\end{frame}
+
+
+\begin{frame}{Backtesting}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_h_pred_out.pdf}
+\end{frame}
+
+
+
+\begin{frame}{Autocorrelations before and after Seasonalities}
+    The plot is coming soon
+\end{frame}
+
+
+% === Refinements and Improvements ===
+\section{Refinements and Improvements}
+
+\begin{frame}{Possible Improvements}
+    Improvements in two ways:
+    \begin{enumerate}[label=(\roman*)]
+        \item Modeling the error term: e.g. Extra Regressors
+              \begin{enumerate}
+                  \item CDD and HDD
+                  \item Temperature of the Day
+                  \item Use Bid/Offer Spread
+                  \item Polynomial Regression
+              \end{enumerate}
+
+        \item Other models and functional forms
+              \begin{enumerate}
+                  \item Smoothing with penalty parameter $\lambda$
+                  \item Fourier or trigonometric functions
+              \end{enumerate}
+    \end{enumerate}
+
+    Will be improved until presentation
+\end{frame}
+
+
+% === The End ===
+\section{The End}
+
+\begin{frame}
+    \centering
+    \Huge
+    Thank you for your attention! \\[0.5cm] Questions \& Discussions?
+\end{frame}
 
 % Put the bibliography
 \nocite{*}

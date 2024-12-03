@@ -140,6 +140,7 @@ fig_h_pred = (
 )
 
 fig_h_pred.draw(show=True)
+fig_h_pred.save(filename="fig_h_pred.pdf", path="Figs")
 
 
 # === Autocorrelation before and after de-seasonalization ===
@@ -196,11 +197,12 @@ fig_h_pred_out = (
     + geom_line()
     + geom_line(mapping=aes(y="h_pred_out"), color="yellow")
     + facet_wrap("year", scales="free")
-    + ggtitle("Actual and Predicted Hourly Prices")
+    + ggtitle("Actual and Predicted Hourly Prices, Out-of-Sample")
     + labs(x="Time", y="Prices")
 )
 
 fig_h_pred_out.draw(show=True)
+fig_h_pred_out.save(filename="fig_h_pred_out.pdf", path="Figs")
 
 rprint(
     mean_absolute_error(y_true=Y_vec_hour_test, y_pred=h_df_test["h_pred_out"])
