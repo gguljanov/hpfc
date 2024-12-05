@@ -5,6 +5,8 @@ import pandas as pd
 
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.tsa.stattools import acf
 
 import matplotlib.pyplot as plt
 from plotnine.ggplot import ggplot
@@ -17,6 +19,7 @@ from plotnine import (
     geom_boxplot,
     ggtitle,
     labs,
+    lims,
 )
 
 
@@ -96,8 +99,8 @@ month_names = np.array(
     ]
 )
 
-for ii in range(11):
-    month_name = month_names[ii]
+for ii in range(1, 12):
+    month_name = month_names[ii - 1]
 
     name_wd = "wd_" + month_name
     name_sat = "sat_" + month_name
@@ -114,6 +117,81 @@ Y_vec_hour = h_df_dummies.loc[:, "nh_preis"]
 
 reg_day_shape = LinearRegression().fit(X=X_mat_hour, y=Y_vec_hour)
 reg_day_shape.score(X=X_mat_hour, y=Y_vec_hour)
+
+
+# === Box Plots for weekday, Sat, and Sun in months ===
+wd_names = ["wd_" + xx for xx in month_names]
+sat_names = ["sat_" + xx for xx in month_names]
+sun_names = ["sun_" + xx for xx in month_names]
+
+h_df_dummies["wd_month"] = pd.from_dummies(
+    h_df_dummies.loc[:, wd_names], default_category="wd_Dec"
+)
+
+h_df_dummies["sat_month"] = pd.from_dummies(
+    h_df_dummies.loc[:, sat_names], default_category="sat_Dec"
+)
+
+h_df_dummies["sun_month"] = pd.from_dummies(
+    h_df_dummies.loc[:, sun_names], default_category="sun_Dec"
+)
+
+cats = wd_names.copy()
+cats.append("wd_Dec")
+
+# Box Plots -- wd_month
+fig_box_wd_month = (
+    ggplot(
+        h_df_dummies,
+        mapping=aes(x="factor(wd_month, categories=cats)", y="nh_preis"),
+    )
+    + geom_boxplot()
+    + ggtitle("Weekday in Each Month")
+    + labs(x="Time", y="Prices")
+    + lims(y=[0.75, 1.25])
+)
+
+# fig_box_wd_month.draw(show=True)
+fig_box_wd_month.save(filename="fig_box_wd_month.pdf", path="Figs")
+
+cats_sat = sat_names.copy()
+cats_sat.append("sat_Dec")
+
+
+# Box Plots -- sat_month
+fig_box_sat_month = (
+    ggplot(
+        h_df_dummies,
+        mapping=aes(x="factor(sat_month, categories=cats_sat)", y="nh_preis"),
+    )
+    + geom_boxplot()
+    + ggtitle("Saturday in Each Month")
+    + labs(x="Time", y="Prices")
+    + lims(y=[0.75, 1.25])
+)
+
+# fig_box_sat_month.draw(show=True)
+fig_box_sat_month.save(filename="fig_box_sat_month.pdf", path="Figs")
+
+
+cats_sun = sun_names.copy()
+cats_sun.append("sun_Dec")
+
+
+# Box Plots -- sun_month
+fig_box_sun_month = (
+    ggplot(
+        h_df_dummies,
+        mapping=aes(x="factor(sun_month, categories=cats_sun)", y="nh_preis"),
+    )
+    + geom_boxplot()
+    + ggtitle("Sunday in Each Month")
+    + labs(x="Time", y="Prices")
+    + lims(y=[0.75, 1.25])
+)
+
+# fig_box_sun_month.draw(show=True)
+fig_box_sun_month.save(filename="fig_box_sun_month.pdf", path="Figs")
 
 
 # === Actual vs. Predicted values ===
@@ -149,7 +227,23 @@ fig_h_pred.save(filename="fig_h_pred.pdf", path="Figs")
 
 
 # === Autocorrelation before and after de-seasonalization ===
-# To be done
+plot_acf(d_df["nd_preis"])
+# plt.show()
+plt.savefig("Figs/daily_prices-before_seas.pdf")
+
+res_daily = d_df["nd_preis"] - d_df["nd_pred"]
+plot_acf(res_daily)
+# plt.show()
+plt.savefig("Figs/daily_prices-after_seas.pdf")
+
+plot_acf(h_df["nh_preis"])
+# plt.show()
+plt.savefig("Figs/hourly_prices-before_seas.pdf")
+
+res_hourly = h_df["nh_preis"] - h_df["nh_pred"]
+plot_acf(res_hourly)
+# plt.show()
+plt.savefig("Figs/hourly_prices-after_seas.pdf")
 
 
 # === MAE, RMSE ===
@@ -207,10 +301,10 @@ h_df_test["h_pred_out"] = (
 rprint(h_df.columns)
 
 fig_h_pred_out = (
-    # ggplot(
-    #     h_df_test[h_df_test["month"] == 1], mapping=aes(x="Datum", y="h_preis")
-    # )
-    ggplot(h_df_test, mapping=aes(x="Datum", y="h_preis"))
+    ggplot(
+        h_df_test[h_df_test["month"] == 1], mapping=aes(x="Datum", y="h_preis")
+    )
+    # ggplot(h_df_test, mapping=aes(x="Datum", y="h_preis"))
     + geom_line()
     + geom_line(mapping=aes(y="h_pred_out"), color="yellow")
     + facet_wrap("year", scales="free")
@@ -218,7 +312,7 @@ fig_h_pred_out = (
     + labs(x="Time", y="Prices")
 )
 
-# fig_h_pred_out.draw(show=True)
+fig_h_pred_out.draw(show=True)
 fig_h_pred_out.save(filename="fig_h_pred_out.pdf", path="Figs")
 
 # Out-of-sample fit

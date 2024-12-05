@@ -14,6 +14,7 @@ from plotnine import (
     geom_boxplot,
     ggtitle,
     labs,
+    lims,
 )
 
 
@@ -81,9 +82,6 @@ wo_outlier_df = outlier_df.copy()
 
 sel = down_spike + up_spike
 
-# wo_outlier_df.loc[down_spike, "Preis"] = np.nan
-# wo_outlier_df.loc[up_spike, "Preis"] = np.nan
-
 smoothed_preis = (
     wo_outlier_df.loc[:, "Preis"]
     .rolling(window=168, min_periods=1, center=True)
@@ -91,8 +89,6 @@ smoothed_preis = (
 )
 
 wo_outlier_df.loc[sel, "Preis"] = smoothed_preis[sel]
-
-# wo_outlier_df.interpolate(method="time", inplace=True)
 
 fig_wo_outliers = (
     ggplot(wo_outlier_df, mapping=aes("Datum", "Preis"))
@@ -259,6 +255,19 @@ fig_box_day = (
 
 # fig_box_day.draw(show=True)
 fig_box_day.save(filename="fig_box_day.pdf", path="Figs")
+
+
+# === Box Plots -- Hourly ===
+fig_box_hour = (
+    ggplot(h_df, mapping=aes(x="factor(hour)", y="nh_preis"))
+    + geom_boxplot()
+    + ggtitle("Hourly prices")
+    + labs(x="Time", y="Prices")
+    + lims(y=[0.5, 1.5])
+)
+
+# fig_box_hour.draw(show=True)
+fig_box_hour.save(filename="fig_box_hour.pdf", path="Figs")
 
 
 # === Autocorrelation Plots ===

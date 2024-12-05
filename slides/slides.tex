@@ -100,10 +100,10 @@
 \begin{frame}{Theoretical Background -- \cite{BurgerGraeberSchindlmayr-2014}}
     The valuation using the hourly forward curve must match the valuation using market quotes from exchanges:
     \[
-        \frac{1}{|J^b| \sum_{i \in J^b} F(t, T_i)} = F^b
+        \frac{1}{|J^b|} \sum_{i \in J^b} F(t, T_i) = F^b
     \]
     \begin{enumerate}[label=--, itemsep=0.1cm]
-        \item $F_b$ is the price of a standard baseload contract (e.g. a certain calendar year)
+        \item $F^b$ is the price of a standard baseload contract (e.g. a certain calendar year)
 
         \item $J^b$ is the set of hours within the delivery year
 
@@ -148,7 +148,7 @@
                   y(t)
                   = \sum_{j = 1}^N \beta_j \mathds{1}_{D_j}(t) + \epsilon(t)
               \]
-              \begin{enumerate}
+              \begin{enumerate}[label=--]
                   \item $D_j$: set of all days within cluster $j$
               \end{enumerate}
 
@@ -249,7 +249,22 @@
 
 
 \begin{frame}{Box Plots for Seasonalities within a Day}
-    Figures are coming
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_box_hour.pdf}
+\end{frame}
+
+
+\begin{frame}{Box Plots for Seasonalities within a Day}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_box_wd_month.pdf}
+\end{frame}
+
+
+\begin{frame}{Box Plots for Seasonalities within a Day}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_box_sat_month.pdf}
+\end{frame}
+
+
+\begin{frame}{Box Plots for Seasonalities within a Day}
+    \includegraphics[width=0.95\textwidth]{../Figs/fig_box_sun_month.pdf}
 \end{frame}
 
 
@@ -270,7 +285,18 @@
 \section{Estimation Results}
 
 \begin{frame}{Estimation Results}
-    The Results are coming soon. For now, it can be accessed with running Python Codes.
+    Performance Metrics:
+
+    \begin{center}
+        \input{../Tables/fit_df.tex}
+    \end{center}
+
+    \vspace*{0.5cm}
+
+    \begin{enumerate}[label=$\bullet$]
+        \item Test data contains all the prices of year 2023
+        \item The rest is training data
+    \end{enumerate}
 \end{frame}
 
 
@@ -284,9 +310,23 @@
 \end{frame}
 
 
+\begin{frame}{Daily Prices -- before de-seasonalization}
+    \includegraphics[width=0.95\textwidth]{../Figs/daily_prices-before_seas.pdf}
+\end{frame}
 
-\begin{frame}{Autocorrelations before and after Seasonalities}
-    The plot is coming soon
+
+\begin{frame}{Daily Prices -- after de-seasonalization}
+    \includegraphics[width=0.95\textwidth]{../Figs/daily_prices-after_seas.pdf}
+\end{frame}
+
+
+\begin{frame}{Hourly Prices -- before de-seasonalization}
+    \includegraphics[width=0.95\textwidth]{../Figs/hourly_prices-before_seas.pdf}
+\end{frame}
+
+
+\begin{frame}{Hourly Prices -- after de-seasonalization}
+    \includegraphics[width=0.95\textwidth]{../Figs/hourly_prices-after_seas.pdf}
 \end{frame}
 
 
@@ -294,36 +334,64 @@
 \section{Refinements and Improvements}
 
 \begin{frame}{Possible Improvements}
-    \begin{enumerate}[label=(\roman*)]
-        \item Modeling the error term:
-              Extra Regressors: Temperature of the day, CDD and HDD,
+    \begin{enumerate}[label=\roman*.]
+        \item Modeling the error term
 
         \item Other models and functional forms
 
         \item The combination of the two
+
+        \item More statistical details
     \end{enumerate}
 \end{frame}
 
 
 \begin{frame}{Possible Improvements}
-    Extra Regressors
-    \begin{enumerate}[label=(\roman*)]
+    Possible extra regressors:
+    \begin{enumerate}[label=$\bullet$]
         \item Temperature of the day
 
-        \item CDD and HDD,
+        \item CDD and HDD
 
-        \item
+        \item Demand Forecasts
+
+        \item Weather Forecasts
     \end{enumerate}
 \end{frame}
 
 
 \begin{frame}{Modelling the Error Term}
-    Polynomial Regression
+    From \cite{Saethero-2017}:
+
+    The correction term $\epsilon(t)$ is modeled by a polynomial spline of the form:
+    \[
+        \epsilon_t
+        = \begin{cases}
+            a_1 t^4 + b_1 t^3 + c_1 t^2 + d_1 t + e_1 \quad t \in [t_0, t_1]
+            \\
+            a_2 t^4 + b_2 t^3 + c_2 t^2 + d_2 t + e_2 \quad t \in [t_1, t_2]
+            \\
+            \hspace*{2cm} \vdots
+            \\
+            a_n t^4 + b_n t^3 + c_n t^2 + d_n t + e_n \quad t \in [t_{n-1}, t_n]
+            \\
+        \end{cases}
+    \]
+    % \[
+    %     x^T = [
+    %             a_1, b_1, c_1, d_1, e_1,
+    %             ~ a_2, b_2, c_2, d_2, e_2,
+    %             ~ \ldots
+    %             ~ a_n, b_n, c_n, d_n, e_n
+    %         ]
+    % \]
 \end{frame}
 
 
 \begin{frame}{Modelling the Error Term}
-    Using Structural trends: from \cite{deJongDijkenEnev-2013} and \cite{BurgerGraeberSchindlmayr-2014}
+    From \cite{deJongDijkenEnev-2013} and \cite{BurgerGraeberSchindlmayr-2014}
+
+    Using Structural trends:
     \[
         \Delta s(t) = -\beta_1 s(t-24)
         - \beta_2 \Delta p_{\text{solar}}(t)
@@ -341,7 +409,9 @@
 
 
 \begin{frame}{Other models and functional forms}
-    Bid-offer prices \& Smoothing from \cite{FletenLemming-2003} and \cite{BurgerGraeberSchindlmayr-2014}:
+    From \cite{FletenLemming-2003} and \cite{BurgerGraeberSchindlmayr-2014}
+
+    Bid-offer prices \& Smoothing:
     \[
         \min \sum_{t=1}^T \bigg(f(t) - s(t) \bigg)^2
         + \lambda \sum_{t=2}^{T-1} \bigg(
@@ -352,13 +422,13 @@
     \begin{align*}
         F(T_{1i}, T_{2i})_{bid}
          & \leq
-        \frac{1}{\sum_{t=T_{1i}}^{T_{2i}}} e^{-rt}
+        \frac{1}{\sum_{t=T_{1i}}^{T_{2i}} e^{-rt}}
         \sum_{t=T_{1i}}^{T_{2i}} e^{-rt} f(t);
         \quad \forall i \in \mathcal{F}
         \\
         F(T_{1i}, T_{2i})_{offer}
          & \geq
-        \frac{1}{\sum_{t=T_{1i}}^{T_{2i}}} e^{-rt}
+        \frac{1}{\sum_{t=T_{1i}}^{T_{2i}} e^{-rt}}
         \sum_{t=T_{1i}}^{T_{2i}} e^{-rt} f(t);
         \quad \forall i \in \mathcal{F}
     \end{align*}
@@ -366,7 +436,36 @@
 
 
 \begin{frame}{Other models and functional forms}
-    Fourier or trigonometric functions
+    \cite{Saethero-2017}:
+
+    Truncated Fourier series are sums of trigonometric functions of the form
+    \[
+        F_n(t)
+        = \alpha_0
+        + \sum_{i=1}^n \bigg[
+            a_i \sin(i \cdot \pi \cdot t) + b_i \cos(i \cdot \pi \cdot t)
+            \bigg]
+    \]
+    and are commonly used to model cycles.
+\end{frame}
+
+
+\begin{frame}{Source: \cite{Saethero-2017}; Comparison Study}
+    \begin{center}
+        \includegraphics[
+            height=0.95\textheight
+            % scale=0.29
+        ]{../Figs/comparison-dummy-fourier.png}
+    \end{center}
+\end{frame}
+
+
+\begin{frame}{Combination of techniques}
+    \cite{Saethero-2017}:
+
+    \begin{quote}
+        Overall one should not use one specific de-seasonalisation approach in isolation but rather use a combination of the different techniques to reflect observed seasonal patterns in electricity prices.
+    \end{quote}
 \end{frame}
 
 
